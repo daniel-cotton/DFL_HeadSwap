@@ -1,5 +1,7 @@
 import os
 import sys
+sys.path.append(os.getenv('DEEPFACELAB_PATH'))
+sys.path.append('DFL_HeadSwap')
 import traceback
 import queue
 import threading
@@ -27,6 +29,7 @@ def extract(input_dir, output_dir):
                     face_type               = 'head',
                     max_faces_from_image    = None,
                     image_size              = None,
+                    image_type              = None,
                     jpeg_quality            = None,
                     cpu_only                = True,
                     force_gpu_idxs          = None,
