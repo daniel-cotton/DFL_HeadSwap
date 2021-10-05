@@ -21,8 +21,8 @@ from core.joblib import Subprocessor
 from core.leras import nn
 from core import pathex
 from core.cv2ex import *
-from DFLIMG import *
-from mainscripts import Extractor
+from lib.DFLIMG import *
+from lib import Extractor
 
 DEBUG = False
 
@@ -36,6 +36,7 @@ def extract(detector=None,
          face_type='head',
          max_faces_from_image=None,
          image_size=None,
+         image_type=None,
          jpeg_quality=None,
          cpu_only = False,
          force_gpu_idxs = None,
@@ -62,6 +63,9 @@ def extract(detector=None,
 
     if image_size is None:
         image_size = 768
+        
+    if image_type is None:
+        image_type = 'png'
 
     if jpeg_quality is None:
         jpeg_quality = 90
@@ -97,16 +101,17 @@ def extract(detector=None,
     if images_found != 0:
         if detector == 'manual':
             io.log_info ('Performing manual extract...')
-            data = Extractor.ExtractSubprocessor ([ Extractor.ExtractSubprocessor.Data(Path(filename)) for filename in input_image_paths ], 'landmarks-manual', image_size, jpeg_quality, face_type, output_debug_path if output_debug else None, manual_window_size=manual_window_size, device_config=device_config).run()
+            data = Extractor.ExtractSubprocessor ([ Extractor.ExtractSubprocessor.Data(Path(filename)) for filename in input_image_paths ], 'landmarks-manual', image_size, image_type, jpeg_quality, face_type, output_debug_path if output_debug else None, manual_window_size=manual_window_size, device_config=device_config).run()
 
             io.log_info ('Performing 3rd pass...')
-            data = Extractor.ExtractSubprocessor (data, 'final', image_size, jpeg_quality, face_type, output_debug_path if output_debug else None, final_output_path=output_path, device_config=device_config).run()
+            data = Extractor.ExtractSubprocessor (data, 'final', image_size, image_type, jpeg_quality, face_type, output_debug_path if output_debug else None, final_output_path=output_path, device_config=device_config).run()
 
         else:
             io.log_info ('Extracting faces...')
             data = Extractor.ExtractSubprocessor ([ Extractor.ExtractSubprocessor.Data(Path(filename)) for filename in input_image_paths ],
                                          'all',
                                          image_size,
+                                         image_type,
                                          jpeg_quality,
                                          face_type,
                                          output_debug_path if output_debug else None,
@@ -122,8 +127,8 @@ def extract(detector=None,
             else:
                 fix_data = [ Extractor.ExtractSubprocessor.Data(d.filepath) for d in data if d.faces_detected == 0 ]
                 io.log_info ('Performing manual fix for %d images...' % (len(fix_data)) )
-                fix_data = Extractor.ExtractSubprocessor (fix_data, 'landmarks-manual', image_size, jpeg_quality, face_type, output_debug_path if output_debug else None, manual_window_size=manual_window_size, device_config=device_config).run()
-                fix_data = Extractor.ExtractSubprocessor (fix_data, 'final', image_size, jpeg_quality, face_type, output_debug_path if output_debug else None, final_output_path=output_path, device_config=device_config).run()
+                fix_data = Extractor.ExtractSubprocessor (fix_data, 'landmarks-manual', image_size, image_type, jpeg_quality, face_type, output_debug_path if output_debug else None, manual_window_size=manual_window_size, device_config=device_config).run()
+                fix_data = Extractor.ExtractSubprocessor (fix_data, 'final', image_size, image_type, jpeg_quality, face_type, output_debug_path if output_debug else None, final_output_path=output_path, device_config=device_config).run()
                 faces_detected += sum([d.faces_detected for d in fix_data])
 
 
